@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الجراج الذكي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#E9EDF3;--card:#fff;--ink:#17202B;--mute:#667385;--line:#C9D0D9;--blue:#2459E0;--bluebg:#E4ECFD;--onblue:#fff;--ev:#0E9F73;--evbg:#DDF4EB;--acc:#7A4DE0;--accbg:#ECE6FB;--free:#fff;--taken:#CBD1D9;--sel:#E3A21A;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151C;--card:#1A222D;--ink:#EEF1F5;--mute:#9AA6B6;--line:#334053;--blue:#6C93FF;--bluebg:#1D2A4D;--onblue:#0B1220;--ev:#38D39F;--evbg:#12362B;--acc:#A98BFF;--accbg:#2A2147;--free:#1A222D;--taken:#2B3441;--sel:#F0B73A;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10151C;--card:#1A222D;--ink:#EEF1F5;--mute:#9AA6B6;--line:#334053;--blue:#6C93FF;--bluebg:#1D2A4D;--onblue:#0B1220;--ev:#38D39F;--evbg:#12362B;--acc:#A98BFF;--accbg:#2A2147;--free:#1A222D;--taken:#2B3441;--sel:#F0B73A;color-scheme:dark}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Cairo,"Segoe UI",Tahoma,sans-serif;font-size:15px}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{max-width:430px;height:100%;margin:auto;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--bg)}
+.view{display:none;flex:1;overflow-y:auto;padding:16px 16px 24px}.view.on{display:block}
+h1{font-size:23px;font-weight:800;margin:0}h2{font-size:18px;margin:0 0 10px}
+.sub{color:var(--mute);margin:2px 0 12px}
+.hero{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#1B3FA8,#2459E0 55%,#12A5A0);color:#fff;border-radius:18px;padding:16px 18px;margin-bottom:12px}
+.hero p{margin:2px 0 0;opacity:.88;font-size:13px}.logo{font-size:32px;background:rgba(255,255,255,.2);width:56px;height:56px;border-radius:16px;display:grid;place-items:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.st{border-radius:14px;padding:10px 4px;text-align:center;background:var(--bluebg)}.st i{font-style:normal;font-size:18px}
+.st b{display:block;font-size:19px;font-weight:800;color:var(--blue)}.st span{font-size:11px;color:var(--mute)}
+.st.g{background:var(--evbg)}.st.g b{color:var(--ev)}.st.p{background:var(--accbg)}.st.p b{color:var(--acc)}
+.seg{display:flex;background:var(--card);border-radius:12px;padding:4px;margin-bottom:10px}
+.seg button{flex:1;border:0;background:none;padding:8px 0;font-size:12px;border-radius:9px;font-weight:600;color:var(--mute)}
+.seg button.on{background:var(--blue);color:var(--onblue)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chips button{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:5px 12px;font-size:13px}
+.chips button.on{border-color:var(--blue);background:var(--bluebg);color:var(--blue);font-weight:700}
+.lot{background:var(--card);border-radius:16px;padding:12px 10px}
+.row{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.lane{margin:10px 0;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:12px;background:repeating-linear-gradient(90deg,transparent 0 14px,var(--line) 14px 15px)}
+.spot{position:relative;height:66px;border:2px solid var(--line);background:var(--free);border-radius:6px;display:flex;align-items:flex-end;justify-content:center;padding:0 0 4px;font-size:10px;font-weight:600;color:var(--mute)}
+.spot.ev{border-color:var(--ev);background:var(--evbg)}
+.spot.ev::after{content:"⚡";position:absolute;top:3px;font-size:11px}
+.spot.acc{border-color:var(--acc);background:var(--accbg)}
+.spot.acc::after{content:"♿";position:absolute;top:3px;font-size:12px}
+.spot.taken{background:var(--taken);border-color:transparent;cursor:default}
+.spot.taken::after{display:none}
+.spot.taken::before{content:"";position:absolute;top:8px;width:60%;height:60%;border-radius:8px 8px 4px 4px;background:rgba(120,130,145,.55)}
+.spot.mine{background:var(--sel);border-color:var(--sel);color:#17202B}.spot.mine::before{background:rgba(0,0,0,.25)}
+.spot.buf{background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--sel) 35%,transparent) 0 5px,transparent 5px 10px);border:2px dashed var(--sel);color:var(--mute)}.spot.buf::before{display:none}.spot.buf::after{display:block;content:'⏳';position:absolute;top:3px;font-size:11px}.spot.dim{opacity:.3}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;color:var(--mute);font-size:12px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:2px solid var(--line);vertical-align:-2px;margin-inline-end:4px}
+.legend u{text-decoration:none}
+nav{display:flex;background:var(--card);border-top:1px solid var(--line)}
+nav button{flex:1;border:0;background:none;padding:7px 0;font-size:12px;font-weight:600;color:var(--mute);position:relative;display:flex;flex-direction:column;align-items:center;gap:1px}
+nav button.on{color:var(--blue)}nav i{font-style:normal;font-size:20px}
+nav .dot{position:absolute;top:6px;inset-inline-end:28%;width:9px;height:9px;border-radius:50%;background:var(--ev);display:none}
+.primary{width:100%;border:0;background:linear-gradient(135deg,#2459E0,#12A5A0);color:#fff;padding:14px;border-radius:12px;font-weight:800;font-size:16px}
+.primary:disabled{opacity:.6}
+.ghost{width:100%;border:1px solid var(--line);background:none;padding:12px;border-radius:12px;margin-top:10px;font-weight:600}
+.mini{border:0;background:var(--bluebg);color:var(--blue);padding:6px 14px;border-radius:10px;font-weight:700}
+#sheet{position:absolute;inset:auto 0 0 0;max-height:92%;overflow-y:auto;background:var(--card);border-radius:20px 20px 0 0;padding:18px 16px 22px;transform:translateY(105%);transition:transform .25s;box-shadow:0 -8px 30px rgba(0,0,0,.25);z-index:5}
+#sheet.open{transform:none}#veil{position:absolute;inset:0;background:rgba(10,16,28,.55);z-index:4;display:none}#veil.on{display:block}
+.k{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.k span:first-child{color:var(--mute)}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-weight:700;font-size:12px;background:var(--evbg);color:var(--ev);margin-inline-start:6px}.badge.p{background:var(--accbg);color:var(--acc)}
+.step{display:flex;align-items:center;gap:12px}.step button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:none;font-size:18px}
+.lb{display:block;color:var(--mute);font-size:13px;margin:6px 0 4px}
+.pm{display:flex;align-items:center;gap:10px;background:var(--card);border:2px solid transparent;border-radius:12px;padding:12px;margin-bottom:8px;width:100%;text-align:start}
+.pm.on{border-color:var(--blue);background:var(--bluebg)}
+input{width:100%;font:inherit;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);margin-bottom:8px;direction:ltr;text-align:start}
+input[type=checkbox]{width:auto;margin:0;accent-color:var(--blue)}.chk{display:flex;gap:8px;align-items:center;margin:4px 0 12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tk{background:var(--card);border-radius:18px;padding:18px;text-align:center}.tk.sm{text-align:start;margin-bottom:12px;padding:10px 16px}
+#qr{background:#fff;padding:12px;border-radius:12px;display:inline-block;margin:10px 0}
+.badge.s{background:var(--evbg);color:var(--ev);margin:0}
+.empty{text-align:center;color:var(--mute);padding:60px 10px}.cdw{background:var(--bluebg);border-radius:14px;padding:10px 14px;margin-bottom:12px;text-align:center}.cdt{font-weight:800;font-size:18px}.pgw{height:8px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:8px}.pgw b{display:block;height:100%;width:0;transition:width .4s linear}
+.card{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.ft{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.ft i{font-style:normal;font-size:22px;width:42px;height:42px;border-radius:12px;background:var(--bluebg);display:grid;place-items:center;flex:none}
+#tut{position:absolute;inset:0;z-index:20;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;text-align:center;gap:8px}
+#tut p{color:var(--mute);max-width:300px;margin:0}#tut .primary,#tut .ghost{max-width:320px}
+.art{width:190px;height:190px;border-radius:50%;display:grid;place-items:center;font-size:54px;margin-bottom:10px}
+.c0{background:linear-gradient(135deg,#BFD3FF,#9FE3DC)}.c1{background:linear-gradient(135deg,#FFE2A8,#FFC4A8)}.c2{background:linear-gradient(135deg,#C9F0DE,#BFD3FF)}.c3{background:linear-gradient(135deg,#DCCFFB,#BFD3FF)}
+.dots{display:flex;gap:6px;margin:6px 0 12px}.dots b{width:8px;height:8px;border-radius:5px;background:var(--line)}.dots b.on{background:var(--blue);width:22px}
+.lg{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));inset-inline-end:16px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:5px 12px;font-weight:700}
+#toast{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:16px;right:16px;background:var(--ink);color:var(--bg);padding:11px 14px;border-radius:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;text-align:center}
+#toast.on{opacity:1}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){#sheet{transition:none}}
+.warn{background:color-mix(in srgb,#E5484D 14%,var(--card));border:1px solid #E5484D;border-radius:12px;padding:10px;margin:8px 0;font-size:13px}.okb{color:var(--ev);font-weight:700;font-size:13px;margin:8px 0}.slots{margin-top:8px;font-size:13px}.slots span{display:inline-block;background:var(--bluebg);color:var(--blue);border-radius:8px;padding:2px 8px;margin:4px 0 0;margin-inline-end:4px}.slots em{color:var(--mute)}#gb .mini{margin-inline-start:8px}</style></head>
+<body><div id="app">
+
+<section class="view on" id="v-home">
+  <div class="hero"><div><h1 data-i="app"></h1><p data-i="sub"></p></div><div class="logo">🅿️</div></div><div class="cdw" id="gb" style="display:none"></div>
+  <div class="stats">
+    <div class="st"><i>🚗</i><b id="sA"></b><span data-i="sA"></span></div>
+    <div class="st g"><i>⚡</i><b id="sE"></b><span data-i="sE"></span></div>
+    <div class="st p"><i>♿</i><b id="sC"></b><span data-i="sC"></span></div>
+  </div>
+  <div class="seg" id="floors"><button class="on" data-f="0"></button><button data-f="1"></button><button data-f="2"></button><button data-f="3"></button><button data-f="4"></button></div>
+  <div class="chips" id="chips"><button class="on" data-c="all" data-i="all"></button><button data-c="free" data-i="onlyFree"></button><button data-c="ev" data-i="ev"></button><button data-c="acc" data-i="acc"></button></div>
+  <div class="lot"><div id="grid"></div>
+    <div class="legend"><span><i></i><u data-i="lgFree"></u></span><span><i style="background:var(--taken);border-color:transparent"></i><u data-i="lgTaken"></u></span><span><i style="background:var(--evbg);border-color:var(--ev)"></i><u data-i="lgEv"></u></span><span><i style="background:var(--accbg);border-color:var(--acc)"></i><u data-i="lgAcc"></u></span><span><i style="background:var(--sel);border-color:var(--sel)"></i><u data-i="lgMine"></u></span><span><i style="border:2px dashed var(--sel)"></i><u data-i="lgBuf"></u></span></div>
+  </div>
+</section>
+<section class="view" id="v-pay"></section>
+<section class="view" id="v-ticket"></section>
+<section class="view" id="v-settings"></section><section class="view" id="v-nav"></section>
+
+<nav><button class="on" data-v="home"><i>🅿️</i><span data-i="nSp"></span></button><button data-v="ticket"><i>🎫</i><span data-i="nTk"></span><b class="dot" id="dot"></b></button><button data-v="settings"><i>⚙️</i><span data-i="nSt"></span></button></nav>
+<div id="veil"></div><div id="sheet"></div><div id="tut"></div><div id="toast"></div>
+</div>
+
+<script>
+const T={ar:{app:'الجراج الذكي',sub:'اختر مكانك واحجزه قبل وصولك',sA:'متاح',sE:'شحن كهربائي',sC:'ذوي الاحتياجات',fl:'الطابق ',all:'🅿️ الكل',onlyFree:'✅ المتاح فقط',ev:'⚡ شحن كهربائي',acc:'♿ ذوي الاحتياجات',lane:'مسار السيارات',lgFree:'متاح',lgTaken:'مشغول',lgEv:'شحن كهربائي',lgAcc:'ذوي الاحتياجات الخاصة',lgMine:'حجزك',spot:'مكان ',arr:'موعد الوصول (اليوم والتاريخ والساعة)',dur:'مدة الحجز',h:' ساعة',from:'من',to:'إلى',rate:'سعر الساعة',cur:' ج.م',chg:'الشحن',chgTxt:'يُحاسب بالكيلوواط ساعة عند الخروج',tot:'الإجمالي',go:'تابع للدفع',cancel:'إلغاء',accNote:'هذا المكان مخصص لحاملي تصريح ركن ذوي الاحتياجات الخاصة.',busy:'لديك حجز نشط بالفعل، ألغه أولاً من تذكرتي',payT:'الدفع الإلكتروني',pCard:'بطاقة بنكية',pWallet:'محفظة إلكترونية',pFawry:'فوري',cn:'رقم البطاقة',save:'احفظ بيانات الدفع للمرات القادمة',pay:'ادفع',paying:'جارٍ الدفع…',back:'رجوع',cnErr:'أدخل رقم البطاقة كاملاً',paid:'تم الدفع وتأكيد الحجز',tkT:'تذكرتي',noT:'لا توجد تذكرة نشطة',noTx:'اختر مكاناً متاحاً واحجزه لتظهر تذكرتك هنا.',showSp:'اعرض الأماكن',ready:'جاهزة للدخول',inside:'داخل الجراج',spotL:'المكان',paidL:'المدفوع',scanIn:'امسح الكود عند البوابة (محاكاة)',scanOut:'امسح للخروج وإنهاء الزيارة',cancelBk:'إلغاء الحجز',canceled:'تم إلغاء الحجز',opened:'تم التحقق من التذكرة، فُتحت البوابة',exited:'تم الخروج، شكراً لزيارتك',nSp:'الأماكن',nTk:'تذكرتي',nSt:'الإعدادات',stT:'الإعدادات',lang:'اللغة',pm:'بيانات الدفع المحفوظة',none:'لا توجد بيانات محفوظة',clear:'مسح البيانات المحفوظة',cleared:'تم مسح بيانات الدفع',help:'شرح استخدام التطبيق',show:'عرض',ft:'مميزات التطبيق',f1:'الأماكن المتاحة لحظياً على مخطط الجراج',f2:'حجز مسبق باختيار اليوم والساعة حتى ٢٤ ساعة',f3:'دفع إلكتروني وحفظ بياناتك للمرة القادمة',f4:'تذكرة QR لفتح البوابة',f5:'أماكن شحن للسيارات الكهربائية',f6:'أماكن مخصصة لذوي الاحتياجات الخاصة',skip:'تخطي',next:'التالي',start:'ابدأ الاستخدام',t0:'اعرف الأماكن المتاحة',x0:'اختر الطابق وشاهد الأماكن المتاحة والمشغولة وأماكن الشحن وذوي الاحتياجات الخاصة.',t1:'احجز مسبقاً',x1:'اضغط على مكان متاح، حدد اليوم والساعة ومدة الحجز حتى ٢٤ ساعة.',t2:'ادفع إلكترونياً',x2:'اختر وسيلة الدفع، ويمكنك حفظها لتحجز أسرع في المرة القادمة.',t3:'امسح وادخل',x3:'اعرض كود QR في تذكرتك عند البوابة للدخول والخروج.',sec:' ثوانٍ',min:' دقيقة',demo:'وضع العرض التجريبي (٥ ثوانٍ)',demoTx:'يقصّر مدة الحجز إلى ٥ ثوانٍ والفترة الاحتياطية إلى ٥ ثوانٍ لعرض كل المراحل مباشرة أمام لجنة التحكيم.',demoOn:'تم تفعيل وضع العرض التجريبي',demoOff:'تم إيقاف وضع العرض التجريبي',bufL:'الفترة الاحتياطية بين الحجوزات',bufSpot:'هذا المكان في فترة احتياطية بين حجزين وسيُتاح قريباً',ended:'انتهى وقت الحجز، بدأت الفترة الاحتياطية',freed:'انتهت الفترة الاحتياطية، المكان متاح الآن',startsIn:'يبدأ الحجز بعد',endsIn:'متبقي من الحجز',bufIn:'يُتاح المكان لغيرك بعد',gone:'انتهى الحجز',ext:'تمديد الحجز',extT:'⏱️ تمديد الحجز',endsNow:'ينتهي حالياً',extDur:'مدة التمديد',newEnd:'ينتهي بعد التمديد',extGo:'ادفع وأكّد التمديد',extDone:'تم تمديد الحجز',extPay:'يُخصم المبلغ من وسيلة الدفع المستخدمة في الحجز.',maxH:'وصلت إلى الحد الأقصى ٢٤ ساعة لهذا الحجز',newB:'حجز جديد',lgBuf:'فترة احتياطية',f7:'فترة احتياطية بين الحجوزات',f8:'تمديد الحجز في أي وقت',f9:'تنبيه صوتي قبل انتهاء الحجز بـ ١٥ دقيقة',warn:'🔔 تنبيه: يتبقى على انتهاء حجزك',endedT:'انتهى وقت الحجز',endedTx:'اختر مدة جديدة للتمديد أو اخرج من الجراج. سيبقى المكان محجوزاً لك حتى تختار.',pend:'الحجز موقوف، اختر التمديد أو الخروج',gb:'وضع الزائر: اختر مكاناً متاحاً وادفع عند الخروج',gwT:'أهلاً بك في الجراج الذكي',gwX:'لا تحتاج إلى حساب أو تحميل التطبيق. شاهد الأماكن المتاحة، اركن الآن، وادفع عند الخروج. وسنرشدك إلى مكانك.',gwB:'اعرض الأماكن المتاحة',park:'اركن الآن وادفع عند الخروج',entry:'وقت الدخول',nowL:'الآن',payWhen:'الدفع',atExit:'عند الخروج',billing:'يُحسب السعر لكل ساعة بدأت (حد أدنى ساعة واحدة) من لحظة دخولك.',walk:'زائر بدون حجز',entered:'وقت الدخول',payExit:'ادفع واخرج',exitPaid:'تم الدفع، فُتحت بوابة الخروج. شكراً لزيارتك',fee:'المستحق',dir:'الاتجاهات إلى مكاني',navT:'الاتجاهات إلى مكانك',n1:'ادخل من البوابة واتبع اللوحات الإرشادية',n2:'اصعد المنحدر إلى الطابق',n2b:'ابقَ في الطابق الأول (الأرضي)',n3:'سر في المسار الأوسط مسافة نحو',mu:' م',nSp0:'مكانك',nL:'على يسارك',nR:'على يمينك',nEv:'نقطة الشحن بجوار المكان، وصّل الشاحن بعد الركن',nAcc:'المكان قريب من المصعد والمدخل',gateT:'كود بوابة الدخول (للزوار)',gateS:'يمسحه الزائر بكاميرا هاتفه فيفتح التطبيق دون تحميل.',gateTx:'امسح الكود لمشاهدة الأماكن المتاحة والركن والدفع عند الخروج.',simScan:'محاكاة مسح الزائر',f10:'دخول الزوار بمسح كود البوابة دون تحميل التطبيق والدفع عند الخروج',f11:'إرشاد خطوة بخطوة إلى مكان الركن',exitG:'الخروج من الجراج',snd:'التنبيه الصوتي',test:'تجربة',sndTx:'ينبّه قبل انتهاء الحجز بـ ١٥ دقيقة (٣ ثوانٍ في وضع العرض). قد يطلب المتصفح لمس الشاشة مرة لتفعيل الصوت.'},
+en:{app:'Smart Garage',sub:'Pick your spot and book before you arrive',sA:'Available',sE:'EV charging',sC:'Accessible',fl:'Floor ',all:'🅿️ All',onlyFree:'✅ Available',ev:'⚡ EV charging',acc:'♿ Accessible',lane:'Driving lane',lgFree:'Available',lgTaken:'Taken',lgEv:'EV charging',lgAcc:'Accessible parking',lgMine:'Your spot',spot:'Spot ',arr:'Arrival (day, date and time)',dur:'Duration',h:' h',from:'From',to:'To',rate:'Hourly rate',cur:' EGP',chg:'Charging',chgTxt:'Billed per kWh at exit',tot:'Total',go:'Continue to payment',cancel:'Cancel',accNote:'This spot is reserved for holders of a disability parking permit.',busy:'You already have an active booking. Cancel it from My ticket first',payT:'Electronic payment',pCard:'Bank card',pWallet:'Mobile wallet',pFawry:'Fawry',cn:'Card number',save:'Save payment details for next time',pay:'Pay',paying:'Paying…',back:'Back',cnErr:'Enter the full card number',paid:'Payment complete, booking confirmed',tkT:'My ticket',noT:'No active ticket',noTx:'Pick an available spot and book it to see your ticket here.',showSp:'Show spots',ready:'Ready to enter',inside:'Inside the garage',spotL:'Spot',paidL:'Paid',scanIn:'Scan code at the gate (simulated)',scanOut:'Scan to exit and end visit',cancelBk:'Cancel booking',canceled:'Booking canceled',opened:'Ticket verified, the gate is open',exited:'You have exited. Thank you for visiting',nSp:'Spots',nTk:'My ticket',nSt:'Settings',stT:'Settings',lang:'Language',pm:'Saved payment details',none:'Nothing saved',clear:'Clear saved details',cleared:'Payment details cleared',help:'How to use the app',show:'Show',ft:'App features',f1:'Live availability on the garage map',f2:'Pre-booking by day and hour, up to 24 hours',f3:'Electronic payment, saved for next time',f4:'QR ticket to open the gate',f5:'EV charging spots',f6:'Accessible parking spots',skip:'Skip',next:'Next',start:'Get started',t0:'See what is available',x0:'Choose a floor and see free and taken spots, EV charging and accessible parking.',t1:'Book ahead',x1:'Tap a free spot, then set the day, time and duration up to 24 hours.',t2:'Pay online',x2:'Choose a payment method and save it to book faster next time.',t3:'Scan and go',x3:'Show the QR code in your ticket at the gate to enter and exit.',sec:' sec',min:' min',demo:'Demo mode (5 seconds)',demoTx:'Shortens the booking to 5 seconds and the buffer to 5 seconds so every stage can be shown live to the judging panel.',demoOn:'Demo mode is on',demoOff:'Demo mode is off',bufL:'Buffer between bookings',bufSpot:'This spot is in a buffer period between bookings and will open soon',ended:'Booking time is over, the buffer period has started',freed:'The buffer period is over, the spot is available again',startsIn:'Booking starts in',endsIn:'Time left',bufIn:'Spot opens to others in',gone:'Booking ended',ext:'Extend booking',extT:'⏱️ Extend booking',endsNow:'Currently ends',extDur:'Extension',newEnd:'New end time',extGo:'Pay and confirm extension',extDone:'Booking extended',extPay:'Charged to the payment method used for this booking.',maxH:'You reached the 24-hour limit for this booking',newB:'New booking',lgBuf:'Buffer period',f7:'Buffer period between bookings',f8:'Extend your booking anytime',f9:'Sound alert 15 minutes before your booking ends',warn:'🔔 Heads up: your booking ends in',endedT:'Booking time is over',endedTx:'Choose a new duration to extend, or exit the garage. Your spot stays reserved until you choose.',pend:'Booking on hold: choose to extend or exit',gb:'Guest mode: pick a free spot and pay when you exit',gwT:'Welcome to Smart Garage',gwX:'No account or download needed. See free spots, park now and pay when you exit. We will guide you to your spot.',gwB:'See free spots',park:'Park now, pay when I exit',entry:'Entry time',nowL:'Now',payWhen:'Payment',atExit:'At exit',billing:'Billed per started hour (minimum one hour) from the moment you enter.',walk:'Walk-in guest',entered:'Entered at',payExit:'Pay and exit',exitPaid:'Payment complete, the exit gate is open. Thank you for visiting',fee:'Due',dir:'Directions to my spot',navT:'Directions to your spot',n1:'Enter through the gate and follow the signs',n2:'Take the ramp up to floor',n2b:'Stay on floor 1 (ground floor)',n3:'Drive along the central lane for about',mu:' m',nSp0:'Your spot',nL:'is on your left',nR:'is on your right',nEv:'The charging point is at the spot. Plug in after parking',nAcc:'The spot is close to the lift and the entrance',gateT:'Gate QR (for walk-in guests)',gateS:'Guests scan it with their phone camera to open the app without installing anything.',gateTx:'Scan to see free spots, park and pay when you exit.',simScan:'Simulate a guest scan',f10:'Walk-in guests scan the gate QR, no install needed, and pay at exit',f11:'Step-by-step directions to your spot',exitG:'Exit the garage',snd:'Sound alert',test:'Test',sndTx:'Alerts you 15 minutes before your booking ends (3 seconds in demo mode). Your browser may need one tap on the screen to allow sound.'}};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+Object.assign(T.ar,{bkdT:'أوقات محجوزة لهذا المكان',noBk:'لا توجد حجوزات أخرى حالياً',clash:'هذا الوقت محجوز بالفعل لشخص آخر (مع الفترة الاحتياطية بين الحجوزات).',nextFree:'أقرب وقت متاح:',useIt:'استخدم هذا الوقت',demoBusy:'المكان مشغول الآن، اختر مكاناً متاحاً لتجربة العرض.',okSlot:'✅ هذا الوقت متاح لهذا المكان',lost:'عذراً، حُجز هذا الوقت للتو من شخص آخر. اختر وقتاً آخر.',occNow:'المكان مشغول الآن',soon:'المكان محجوز قريباً، اختر مكاناً آخر',leaveBy:'اترك المكان قبل',noExt:'لا يمكن التمديد: المكان محجوز بعدك لشخص آخر.',exErr:'تاريخ انتهاء البطاقة غير صحيح',cvErr:'أدخل رمز CVV من ٣ أرقام',preBk:'احجز مسبقاً بدلاً من ذلك',tooEarly:'يمكنك الدخول عند بدء حجزك في',f12:'عدة أشخاص يحجزون نفس المكان في أوقات مختلفة'});
+Object.assign(T.en,{bkdT:'Already booked times for this spot',noBk:'No other bookings right now',clash:'This time is already booked by someone else (including the buffer between bookings).',nextFree:'Next free time:',useIt:'Use this time',demoBusy:'This spot is busy right now. Pick a free spot for the demo.',okSlot:'✅ This time is free for this spot',lost:'Sorry, someone just booked this time. Please pick another.',occNow:'This spot is occupied right now',soon:'This spot is reserved soon, please pick another',leaveBy:'Please leave by',noExt:'Extension unavailable: someone else has booked this spot after you.',exErr:'Invalid card expiry date',cvErr:'Enter a 3-digit CVV',preBk:'Pre-book instead',tooEarly:'You can enter when your booking starts at',f12:'Several people can share a spot at different times'});
+Object.assign(T.ar,{gateShare:'لكي يعمل الكود لأي شخص: اضغط «مشاركة» على بطاقة التطبيق واختر رابطاً عاماً لأي شخص لديه الرابط. بدون ذلك سيطلب الرابط تسجيل الدخول.',gateLink:'رابط التطبيق المشترك',copy:'نسخ',copied:'تم نسخ الرابط',saved2:'تم حفظ الرابط',badLink:'أدخل رابطاً صحيحاً يبدأ بـ https://'});
+Object.assign(T.en,{gateShare:'For the QR to work for anyone: tap Share on the app card and choose a public link (anyone with the link). Otherwise the link asks for a sign-in.',gateLink:'Shared app link',copy:'Copy',copied:'Link copied',saved2:'Link saved',badLink:'Enter a valid link starting with https://'});
+const ARTURL='https://claude.ai/artifact/6GH3xMooQ3aWHQjEnScSf1';
+const F=[['🅿️','f1'],['📅','f2'],['💳','f3'],['🔳','f4'],['⚡','f5'],['♿','f6'],['🛡️','f7'],['🔁','f8'],['🔔','f9'],['🚶','f10'],['🧭','f11'],['👥','f12']],TI=['🔍🅿️','📅⏱️','💳✅','📱🔳'],RATE=40,H=36e5;
+const ls={g(k){try{return JSON.parse(localStorage.getItem('sg_'+k))}catch(e){return null}},s(k,v){try{localStorage.setItem('sg_'+k,JSON.stringify(v))}catch(e){}},d(k){try{localStorage.removeItem('sg_'+k)}catch(e){}}};
+let lang=ls.g('lang')||'ar',ti=0,GW=0,AC=null,tc=0;
+const t=k=>T[lang][k],L=()=>lang=='ar'?'ar-EG':'en-US',n=x=>Number(x).toLocaleString(L());
+const fd=(d,s)=>d.toLocaleString(L(),{weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',...(s?{second:'2-digit'}:{})});
+const p2=x=>String(x).padStart(2,'0'),iso=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes());
+const q=()=>{const d=new Date();d.setMinutes(Math.ceil(d.getMinutes()/15)*15,0,0);return d};
+const tag=s=>(s.ev?' ⚡':'')+(s.acc?' ♿':''),code=()=>'SG-'+(1000+Math.floor(Math.random()*9000));
+const cd=ms=>{const s=Math.max(0,Math.ceil(ms/1000)),f=x=>Number(x).toLocaleString(L(),{minimumIntegerDigits:2}),h=Math.floor(s/3600);return(h?f(h)+':':'')+f(Math.floor(s%3600/60))+':'+f(s%60)};
+const bufTxt=d=>d?n(5)+t('sec'):n(15)+t('min');
+
+/* Each spot keeps a list of reservations {s:start,e:end,b:buffer,w:'o' other|'m' me}.
+   A new booking is allowed only if its window plus buffer overlaps no other reservation. */
+const T0=Date.now(),spots=[];
+for(let f=0;f<5;f++)for(let r=0;r<2;r++)for(let c=0;c<10;c++){
+  const i=f*20+r*10+c,s={id:'ABCDE'[f]+(r*10+c+1),f,r,c,ev:r==1&&c>=7,acc:r==0&&c<2,res:[]};
+  if(((i*7+f*3+r)%5)<2)s.res.push({s:T0-(1+i%3)*18e5,e:T0+(1+i%4)*H,b:9e5,w:'o'});
+  if(i%3==0)s.res.push({s:T0+(5+i%6)*H,e:T0+(6+i%6+i%3)*H,b:9e5,w:'o'});
+  spots.push(s);
+}
+const spot=id=>spots.find(x=>x.id==id);
+const clash=(sp,s,e,b,ex)=>sp.res.find(r=>r!==ex&&s<r.e+r.b&&r.s<e+b);
+const state=(sp,now)=>{const r=sp.res.find(r=>r.s<=now&&now<r.e);if(r)return r.w=='m'?'mine':'busy';return sp.res.some(r=>r.e<=now&&now<r.e+r.b)?'buf':'free'};
+const nextFree=(sp,s,d,b)=>{let c=s;for(let i=0;i<20;i++){const r=clash(sp,c,c+d,b);if(!r)return c;c=r.e+r.b}return null};
+const nxt=sp=>Math.min(Infinity,...sp.res.filter(r=>r.s>Date.now()).map(r=>r.s));
+const soon=sp=>nxt(sp)-Date.now()<H+9e5;
+const S={floor:0,filter:'all',sel:null,at:null,hrs:2,pm:'card',bk:null,demo:false,guest:false,wp:null,sh:null,pin:false,cf:{},ex:1,exMax:0};
+const price=()=>S.demo?RATE:RATE*S.hrs,dur=()=>S.demo?5000:S.hrs*H,BUF=()=>S.demo?5000:9e5,end=()=>new Date(S.at.getTime()+dur());
+const fee=k=>RATE*Math.max(1,Math.ceil((Date.now()-k.startMs)/(k.demo?5000:H)));
+const dot=v=>{$('#dot').style.display=v?'inline-block':'none'};
+
+function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)}
+function showSheet(fn,pin){S.sh=fn;S.pin=!!pin;fn();$('#veil').classList.toggle('on',!!pin);$('#sheet').classList.add('open')}
+function closeSh(){S.sh=null;S.pin=false;$('#veil').classList.remove('on');$('#sheet').classList.remove('open')}
+function show(v){$$('.view').forEach(e=>e.classList.toggle('on',e.id=='v-'+v));$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v==(v=='pay'?'home':v=='nav'?'ticket':v)));if(v=='ticket')ticket();if(v=='settings')setts();if(!S.pin)closeSh();$('#v-'+v).scrollTop=0}
+function applyLang(){
+  document.documentElement.lang=lang;document.documentElement.dir=lang=='ar'?'rtl':'ltr';
+  $$('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
+  $$('#floors button').forEach(b=>b.textContent=t('fl')+n(+b.dataset.f+1));
+  grid();ticket();setts();
+  if($('#v-nav').classList.contains('on'))showNav();
+  if($('#v-pay').classList.contains('on')&&(S.sel||S.wp))payV();
+  if($('#tut').style.display=='flex')GW?gWel():tut();
+  if(S.sh)S.sh();
+}
+function setLang(l){lang=l;ls.s('lang',l);applyLang()}
+function flip(){setLang(lang=='ar'?'en':'ar')}
+
+function grid(){
+  const now=Date.now(),gb=$('#gb');gb.style.display=S.guest?'block':'none';
+  gb.innerHTML='🚶 '+t('gb')+` <button class="mini" onclick="preBook()">${t('preBk')}</button>`;
+  const fr=spots.filter(s=>state(s,now)=='free');
+  $('#sA').textContent=n(fr.length)+'/'+n(spots.length);$('#sE').textContent=n(fr.filter(s=>s.ev).length);$('#sC').textContent=n(fr.filter(s=>s.acc).length);
+  const g=$('#grid');g.innerHTML='';
+  const list=spots.filter(s=>s.f==S.floor);
+  [0,1].forEach(r=>{
+    if(r==1){const l=document.createElement('div');l.className='lane';l.textContent=t('lane');g.appendChild(l)}
+    const row=document.createElement('div');row.className='row';
+    list.filter(s=>s.r==r).forEach(s=>{
+      const z=state(s,now),b=document.createElement('button');
+      b.className='spot'+(s.ev?' ev':'')+(s.acc?' acc':'')+(z=='busy'||z=='mine'?' taken':'')+(z=='mine'?' mine':'')+(z=='buf'?' buf':'')+(((S.filter=='free'&&z!='free')||(S.filter=='ev'&&!s.ev)||(S.filter=='acc'&&!s.acc))?' dim':'');
+      b.textContent=s.id;b.setAttribute('aria-label',t('spot')+s.id+tag(s)+(z=='busy'?' ('+t('lgTaken')+')':''));
+      b.onclick=()=>pick(s);row.appendChild(b);
+    });g.appendChild(row);
+  });
+}
+$('#floors').onclick=e=>{const f=e.target.dataset.f;if(f==null)return;S.floor=+f;$$('#floors button').forEach(b=>b.classList.toggle('on',b.dataset.f==f));grid()};
+$('#chips').onclick=e=>{const c=e.target.dataset.c;if(!c)return;S.filter=c;$$('#chips button').forEach(b=>b.classList.toggle('on',b.dataset.c==c));grid()};
+$$('nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+function preBook(){S.guest=false;grid()}
+
+function pick(s){
+  if(S.bk){toast(t('busy'));return}
+  S.sel=s;
+  if(S.guest){const z=state(s,Date.now());if(z!='free'){toast(t(z=='buf'?'bufSpot':'occNow'));return}if(soon(s)){toast(t('soon'));return}showSheet(sheetWalk);return}
+  S.at=S.demo?new Date():q();S.hrs=2;showSheet(sheetBook);
+}
+function badges(s){return(s.ev?`<span class="badge">${t('sE')}</span>`:'')+(s.acc?`<span class="badge p">${t('sC')}</span>`:'')}
+function sheetBook(){
+  const s=S.sel,dd=S.demo?'disabled':'',up=s.res.filter(r=>r.e+r.b>Date.now()).sort((a,b)=>a.s-b.s).slice(0,3);
+  $('#sheet').innerHTML=`<h2>${t('spot')}${s.id}${badges(s)}</h2>${s.acc?`<p class="sub" style="margin:0 0 8px">${t('accNote')}</p>`:''}
+  <label class="lb" for="dt">📅 ${t('arr')}</label><input type="datetime-local" id="dt" value="${iso(S.at)}" min="${iso(new Date())}" ${dd}>
+  <div class="k"><span>⏱️ ${t('dur')}</span><span class="step"><button onclick="hr(-1)" aria-label="-" ${dd}>−</button><b id="shH"></b><button onclick="hr(1)" aria-label="+" ${dd}>+</button></span></div>
+  <div class="k"><span>${t('from')}</span><span id="shA"></span></div><div class="k"><span>${t('to')}</span><span id="shB"></span></div>
+  <div class="k"><span>💵 ${t('rate')}</span><span>${n(RATE)}${t('cur')}</span></div><div class="k"><span>🛡️ ${t('bufL')}</span><span>${bufTxt(S.demo)}</span></div>
+  ${s.ev?`<div class="k"><span>⚡ ${t('chg')}</span><span>${t('chgTxt')}</span></div>`:''}
+  <div class="k"><b>${t('tot')}</b><b id="shT"></b></div>
+  <div class="slots"><b>👥 ${t('bkdT')}</b><br>${up.length?up.map(r=>`<span>${fd(new Date(r.s))} – ${tm(new Date(r.e))}</span>`).join(''):`<em>${t('noBk')}</em>`}</div>
+  <div id="shW"></div>
+  <label class="chk" style="margin-top:6px"><input type="checkbox" ${S.demo?'checked':''} onchange="setDemo(this.checked);S.at=S.demo?new Date():q();showSheet(sheetBook)"> 🎬 ${t('demo')}</label>
+  <button class="primary" id="shGo" onclick="toPay()">${t('go')}</button><button class="ghost" onclick="walkIn()">🅿️ ${t('park')}</button><button class="ghost" onclick="closeSh()">${t('cancel')}</button>`;
+  $('#dt').onchange=e=>{const d=new Date(e.target.value);if(isNaN(d))return;if(d<Date.now()-6e4){S.at=q();e.target.value=iso(S.at)}else S.at=d;upd()};
+  upd();
+}
+const tm=d=>d.toLocaleTimeString(L(),{hour:'numeric',minute:'2-digit'});
+function hr(d){S.hrs=Math.min(24,Math.max(1,S.hrs+d));upd()}
+function upd(){
+  const s=S.sel,a=S.at.getTime(),d=dur(),b=BUF(),c=clash(s,a,a+d,b);
+  $('#shH').textContent=S.demo?n(5)+t('sec'):n(S.hrs)+t('h');$('#shA').textContent=fd(S.at,S.demo);$('#shB').textContent=fd(end(),S.demo);$('#shT').textContent=n(price())+t('cur');
+  const w=$('#shW'),go=$('#shGo');
+  if(c){go.disabled=true;let h=`<div class="warn">⛔ ${t('clash')}`;
+    if(S.demo)h+=` ${t('demoBusy')}`;else{const nf=nextFree(s,a,d,b);if(nf!=null)h+=`<br>${t('nextFree')} <b>${fd(new Date(nf))}</b> <button class="mini" onclick="useNext(${nf})">${t('useIt')}</button>`}
+    w.innerHTML=h+'</div>'}
+  else{go.disabled=false;w.innerHTML=`<div class="okb">${t('okSlot')}</div>`}
+}
+function useNext(ms){S.at=new Date(ms);const i=$('#dt');if(i)i.value=iso(S.at);upd()}
+function setDemo(v){S.demo=v;toast(t(v?'demoOn':'demoOff'))}
+
+function sheetWalk(){
+  const s=S.sel,nx=nxt(s);
+  $('#sheet').innerHTML=`<h2>${t('spot')}${s.id}${badges(s)}</h2>${s.acc?`<p class="sub" style="margin:0 0 8px">${t('accNote')}</p>`:''}<div class="k"><span>🕒 ${t('entry')}</span><b>${t('nowL')}</b></div><div class="k"><span>💵 ${t('rate')}</span><span>${n(RATE)}${t('cur')}</span></div><div class="k"><span>💳 ${t('payWhen')}</span><b>${t('atExit')}</b></div>${isFinite(nx)?`<div class="k"><span>⏰ ${t('leaveBy')}</span><b>${fd(new Date(nx-9e5))}</b></div>`:''}<p class="sub" style="margin:8px 0 0;font-size:13px">${t('billing')}</p><label class="chk" style="margin-top:10px"><input type="checkbox" ${S.demo?'checked':''} onchange="setDemo(this.checked)"> 🎬 ${t('demo')}</label><button class="primary" onclick="walkIn()">🅿️ ${t('park')}</button><button class="ghost" onclick="closeSh()">${t('cancel')}</button>`;
+}
+function walkIn(){
+  if(S.bk){toast(t('busy'));return}
+  const s=S.sel,now=Date.now();if(!s)return;
+  const z=state(s,now);if(z!='free'){toast(t(z=='buf'?'bufSpot':'occNow'));return}
+  if(soon(s)){toast(t('soon'));return}
+  const r={s:now,e:Infinity,b:BUF(),w:'m'};s.res.push(r);
+  S.bk={id:s.id,tag:tag(s),code:code(),mode:'walk',total:0,startMs:now,endMs:null,demo:S.demo,state:'in',entered:1,r,cap:nxt(s)-r.b};
+  dot(1);closeSh();grid();toast(t('opened'));showNav();
+}
+
+const svL=v=>v.m=='card'?'💳 •••• '+v.l4+(v.ex?'  '+v.ex:''):v.m=='wallet'?'📱 '+t('pWallet'):'🧾 '+t('pFawry');
+function toPay(){
+  const s=S.sel,a=S.at.getTime();
+  if(clash(s,a,a+dur(),BUF())){upd();toast(t('lost'));return}
+  S.wp=null;S.pm=ls.g('pay')?'saved':'card';S.cf={};closeSh();payV();show('pay');
+}
+function payExit(){const k=S.bk;if(!k)return;S.wp={fee:fee(k),t:Date.now()};S.pm=ls.g('pay')?'saved':'card';S.cf={};payV();show('pay')}
+function payV(){
+  const W=S.wp,sp=W?spot(S.bk.id):S.sel,sv=ls.g('pay'),tot=W?W.fee:price(),dm=W?S.bk.demo:S.demo,a=W?S.bk.startMs:S.at.getTime(),z=W?W.t:a+dur();
+  const M=[...(sv?[['saved','🔒',svL(sv)]]:[]),['card','💳',t('pCard')],['wallet','📱',t('pWallet')],['fawry','🧾',t('pFawry')]];
+  $('#v-pay').innerHTML=`<h2>💳 ${t('payT')}</h2><div class="tk sm"><div class="k"><span>${t('spotL')}</span><b>${sp.id}${tag(sp)}</b></div><div class="k"><span>${t('from')}</span><span>${fd(new Date(a),dm)}</span></div><div class="k"><span>${t('to')}</span><span>${fd(new Date(z),dm)}</span></div><div class="k" style="border:0"><b>${t('tot')}</b><b>${n(tot)}${t('cur')}</b></div></div>
+  ${M.map(m=>`<button class="pm ${S.pm==m[0]?'on':''}" onclick="S.pm='${m[0]}';payV()"><span>${m[1]}</span><b>${m[2]}</b></button>`).join('')}
+  ${S.pm=='card'?`<input id="cn" inputmode="numeric" placeholder="${t('cn')}" maxlength="19" autocomplete="off" value="${S.cf.cn||''}" oninput="S.cf.cn=this.value"><div class="two"><input id="ex" placeholder="MM/YY" maxlength="5" value="${S.cf.ex||''}" oninput="S.cf.ex=this.value"><input id="cv" placeholder="CVV" maxlength="3" inputmode="numeric" autocomplete="off" value="${S.cf.cv||''}" oninput="S.cf.cv=this.value"></div>`:''}
+  ${S.pm!='saved'?`<label class="chk"><input type="checkbox" ${S.cf.sv?'checked':''} onchange="S.cf.sv=this.checked"> ${t('save')}</label>`:''}
+  <button class="primary" id="payBtn" onclick="doPay()">${t('pay')} ${n(tot)}${t('cur')}</button><button class="ghost" onclick="show(S.wp?'ticket':'home')">${t('back')}</button>`;
+}
+function doPay(){
+  let rec=null;
+  if(S.pm=='card'){
+    const num=(S.cf.cn||'').replace(/\D/g,'');if(num.length<12){toast(t('cnErr'));return}
+    const m=(S.cf.ex||'').match(/^(\d{2})\/(\d{2})$/),nw=new Date();
+    if(!m||+m[1]<1||+m[1]>12||(2000+ +m[2])*12+ +m[1]<nw.getFullYear()*12+nw.getMonth()+1){toast(t('exErr'));return}
+    if(!/^\d{3}$/.test(S.cf.cv||'')){toast(t('cvErr'));return}
+    if(S.cf.sv)rec={m:'card',l4:num.slice(-4),ex:S.cf.ex};
+  }else if(S.pm!='saved'&&S.cf.sv)rec={m:S.pm};
+  unlockAudio();const b=$('#payBtn');b.disabled=true;b.textContent=t('paying');
+  setTimeout(()=>{
+    if(rec)ls.s('pay',rec);
+    if(S.wp){const k=S.bk;k.r.e=Date.now();S.bk=null;S.wp=null;dot(0);grid();toast(t('exitPaid'));show('ticket');return}
+    const s=S.sel,st=S.demo?Date.now():S.at.getTime(),e=st+dur(),bf=BUF();
+    if(clash(s,st,e,bf)){toast(t('lost'));S.cf={};show('home');if(S.demo)S.at=new Date();showSheet(sheetBook);return}
+    const r={s:st,e,b:bf,w:'m'};s.res.push(r);
+    S.bk={id:s.id,tag:tag(s),code:code(),mode:'book',total:price(),startMs:st,endMs:e,buf:bf,demo:S.demo,state:'ready',entered:0,r};
+    dot(1);grid();toast(t('paid'));show('ticket');
+  },1100);
+}
+
+function ticket(){
+  const v=$('#v-ticket'),k=S.bk;
+  if(!k){v.innerHTML=`<div class="empty"><div style="font-size:54px">🎫</div><h2>${t('noT')}</h2><p>${t('noTx')}</p><button class="primary" onclick="show('home')">${t('showSp')}</button></div>`;return}
+  if(k.mode=='walk')return wTicket(k);
+  const ex=k.state=='expired',d=k.demo,can=extMax(k).mx>0;
+  const btns=ex?(can?`<button class="primary" style="margin-top:14px" onclick="openExt()">${t('ext')}</button>`:`<p class="sub" style="margin-top:12px">${t('noExt')}</p>`)+`<button class="${can?'ghost':'primary'}" onclick="exitG()">🚪 ${t('exitG')}</button>`
+    :`<button class="primary" style="margin-top:14px" onclick="scan()">${k.state=='ready'?t('scanIn'):t('scanOut')}</button><button class="ghost" onclick="showNav()">🧭 ${t('dir')}</button>${can?`<button class="ghost" onclick="openExt()">${t('ext')}</button>`:''}${k.state=='ready'?`<button class="ghost" onclick="cancelBk()">${t('cancelBk')}</button>`:''}`;
+  v.innerHTML=`<h2>🎫 ${t('tkT')}</h2><div class="cdw"><div class="cdt" id="cd"></div><div class="pgw"><b id="pg"></b></div></div><div class="tk"><span class="badge s">${ex?'⏳ '+t('gone'):k.state=='ready'?'✅ '+t('ready'):'🚗 '+t('inside')}</span>${ex?'':`<div><div id="qr"></div></div>`}<div style="font-size:22px;font-weight:800;letter-spacing:1px;direction:ltr;margin-top:8px">${k.code}</div><div class="k" style="margin-top:10px"><span>${t('spotL')}</span><b>${k.id}${k.tag}</b></div><div class="k"><span>${t('from')}</span><span>${fd(new Date(k.startMs),d)}</span></div><div class="k"><span>${t('to')}</span><span>${fd(new Date(k.endMs),d)}</span></div><div class="k" style="border:0"><span>${t('paidL')}</span><span>${n(k.total)}${t('cur')}</span></div></div>${btns}`;
+  if(!ex)qr(k);live();
+}
+function qr(k){try{new QRCode($('#qr'),{text:'SMARTGARAGE|'+k.code+'|'+k.id,width:176,height:176,colorDark:'#17202B',colorLight:'#ffffff'})}catch(e){$('#qr').textContent=k.code}}
+function wTicket(k){
+  $('#v-ticket').innerHTML=`<h2>🎫 ${t('tkT')}</h2><div class="cdw"><div class="cdt" id="cd"></div><div class="pgw"><b id="pg"></b></div></div><div class="tk"><span class="badge s">🚗 ${t('walk')}</span><div><div id="qr"></div></div><div style="font-size:22px;font-weight:800;letter-spacing:1px;direction:ltr;margin-top:8px">${k.code}</div><div class="k" style="margin-top:10px"><span>${t('spotL')}</span><b>${k.id}${k.tag}</b></div><div class="k" style="${isFinite(k.cap)?'':'border:0'}"><span>${t('entered')}</span><span>${fd(new Date(k.startMs),k.demo)}</span></div>${isFinite(k.cap)?`<div class="k" style="border:0"><span>⏰ ${t('leaveBy')}</span><span>${fd(new Date(k.cap))}</span></div>`:''}</div><button class="primary" style="margin-top:14px" onclick="payExit()">💳 ${t('payExit')}</button><button class="ghost" onclick="showNav()">🧭 ${t('dir')}</button>`;
+  qr(k);live();
+}
+function live(){
+  const k=S.bk,c=$('#cd');if(!k||!c)return;const now=Date.now();let x,p;
+  if(k.mode=='walk'){const u=k.demo?5000:H;x='⏱️ <bdi>'+cd(now-k.startMs)+'</bdi> · '+t('fee')+' <bdi>'+n(fee(k))+t('cur')+'</bdi>';p=(now-k.startMs)%u/u*100}
+  else if(k.state=='expired'){x='⏳ '+t('pend');p=100}
+  else if(now<k.startMs){x=t('startsIn')+' <bdi>'+cd(k.startMs-now)+'</bdi>';p=0}
+  else{x=t('endsIn')+' <bdi>'+cd(k.endMs-now)+'</bdi>';p=(now-k.startMs)/(k.endMs-k.startMs)*100}
+  c.innerHTML=x;const b=$('#pg');b.style.width=Math.min(100,p)+'%';b.style.background=k.state=='expired'?'var(--sel)':'linear-gradient(90deg,#2459E0,#12A5A0)';
+}
+function scan(){
+  const k=S.bk;if(!k)return;
+  if(k.state=='ready'){if(Date.now()<k.startMs){toast(t('tooEarly')+' '+fd(new Date(k.startMs)));return}k.state='in';k.entered=1;toast(t('opened'));showNav()}
+  else if(k.state=='in'){k.r.e=Math.min(k.r.e,Date.now());S.bk=null;dot(0);grid();toast(t('exited'));ticket()}
+}
+function cancelBk(){const k=S.bk;if(!k)return;const s=spot(k.id);s.res=s.res.filter(r=>r!==k.r);S.bk=null;dot(0);grid();toast(t('canceled'));ticket()}
+function exitG(){const k=S.bk;if(!k)return;k.r.e=Date.now();S.bk=null;dot(0);closeSh();grid();toast(t('exited'));ticket()}
+
+/* how many extra hours can be added without touching someone else's booking */
+function extMax(k){
+  if(k.mode=='walk')return{mx:0,why:'noExt'};
+  const now=Date.now(),base=k.state=='expired'?now:Math.max(k.endMs,now);
+  const o=spot(k.id).res.filter(r=>r!==k.r&&r.s>=k.startMs).map(r=>r.s),lim=o.length?Math.min(...o)-k.buf:Infinity;
+  const byDay=k.startMs+24*H-base,byNext=lim-base;
+  return{mx:k.demo?(byNext>=5000?1:0):Math.floor(Math.min(byDay,byNext)/H),why:byDay<byNext?'maxH':'noExt'};
+}
+function openExt(x){const k=S.bk;if(!k)return;const e=extMax(k);if(e.mx<1&&!x){toast(t(e.why));return}S.ex=1;S.exMax=e.mx;showSheet(()=>sheetExt(x),x)}
+function sheetExt(x){
+  const k=S.bk;if(!k){closeSh();return}
+  const head=x?`<h2>⏳ ${t('endedT')}</h2><p class="sub" style="margin:0 0 8px">${t('endedTx')}</p>`:`<h2>${t('extT')}</h2>`;
+  if(S.exMax<1){$('#sheet').innerHTML=head+`<p class="warn">${t('noExt')}</p><button class="primary" onclick="exitG()">🚪 ${t('exitG')}</button>`;return}
+  $('#sheet').innerHTML=head+`<div class="k"><span>${t('endsNow')}</span><span>${fd(new Date(k.endMs),k.demo)}</span></div><div class="k"><span>⏱️ ${t('extDur')}</span><span class="step"><button onclick="exh(-1)" ${k.demo?'disabled':''}>−</button><b id="exH"></b><button onclick="exh(1)" ${k.demo?'disabled':''}>+</button></span></div><div class="k"><span>${t('newEnd')}</span><span id="exN"></span></div><div class="k"><span>💵 ${t('rate')}</span><span>${n(RATE)}${t('cur')}</span></div><div class="k"><b>${t('tot')}</b><b id="exT"></b></div><p class="sub" style="margin:8px 0 0;font-size:13px">💳 ${t('extPay')}</p><button class="primary" style="margin-top:10px" onclick="doExt()">${t('extGo')}</button>${x?`<button class="ghost" onclick="exitG()">🚪 ${t('exitG')}</button>`:`<button class="ghost" onclick="closeSh()">${t('cancel')}</button>`}`;
+  exUpd();
+}
+function exh(d){S.ex=Math.min(S.exMax,Math.max(1,S.ex+d));exUpd()}
+function exUpd(){const k=S.bk,base=k.state=='expired'?Date.now():Math.max(k.endMs,Date.now());$('#exH').textContent=k.demo?n(5)+t('sec'):n(S.ex)+t('h');$('#exN').textContent=fd(new Date(base+(k.demo?5000:S.ex*H)),k.demo);$('#exT').textContent=n(k.demo?RATE:RATE*S.ex)+t('cur')}
+function doExt(){
+  const k=S.bk;if(!k){closeSh();toast(t('gone'));return}
+  const e=extMax(k);if(e.mx<1||(!k.demo&&S.ex>e.mx)){toast(t('noExt'));closeSh();return}
+  const now=Date.now(),base=k.state=='expired'?now:Math.max(k.endMs,now),add=k.demo?5000:S.ex*H;
+  k.endMs=base+add;k.r.e=k.endMs;k.warned=0;k.total+=k.demo?RATE:RATE*S.ex;
+  if(k.state=='expired')k.state=k.entered?'in':'ready';
+  closeSh();grid();toast(t('extDone'));ticket();
+}
+
+function unlockAudio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume()}catch(e){}}
+function beep(){try{unlockAudio();if(!AC)return;[0,.35,.7].forEach(d=>{const o=AC.createOscillator(),g=AC.createGain(),a=AC.currentTime+d;o.type='sine';o.frequency.value=880;g.gain.setValueAtTime(.0001,a);g.gain.exponentialRampToValueAtTime(.4,a+.03);g.gain.exponentialRampToValueAtTime(.0001,a+.28);o.connect(g);g.connect(AC.destination);o.start(a);o.stop(a+.3)});if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(e){}}
+document.addEventListener('pointerdown',unlockAudio,{once:true});
+
+function tick(){
+  const now=Date.now(),k=S.bk;let ch=0;
+  if(k&&k.mode=='book'&&k.state!='expired'){
+    if(!k.warned&&now>=k.startMs&&now<k.endMs&&now>=k.endMs-(k.demo?3000:9e5)){k.warned=1;beep();toast(t('warn')+' '+(k.demo?n(3)+t('sec'):n(15)+t('min')))}
+    if(now>=k.endMs){k.state='expired';k.r.e=Infinity;ch=1;beep();toast(t('ended'));openExt(1);if($('#v-ticket').classList.contains('on'))ticket()}
+  }
+  if(ch||++tc%10==0)grid();
+  live();
+}
+
+function showNav(){
+  const k=S.bk;if(!k)return;const s=spot(k.id),mir=lang=='ar',px=c=>mir?10+(9-c)*32:10+c*32,cx=px(s.c)+16,ent=mir?336:4,dist=(s.c+1)*3,right=mir?s.r==0:s.r==1,now=Date.now();
+  const st=[['🚪',t('n1')],s.f?['🔼',t('n2')+' '+n(s.f+1)]:['🏁',t('n2b')],['↔️',t('n3')+' '+n(dist)+t('mu')],[right?'↪️':'↩️',t('nSp0')+' '+s.id+' '+t(right?'nR':'nL')]];
+  if(s.ev)st.push(['⚡',t('nEv')]);if(s.acc)st.push(['♿',t('nAcc')]);
+  let sp='';for(let r=0;r<2;r++)for(let c=0;c<10;c++){const o=spots.find(a=>a.f==s.f&&a.r==r&&a.c==c),me=o.id==s.id,z=state(o,now);sp+=`<rect x="${px(c)+3}" y="${r?86:8}" width="26" height="36" rx="4" style="fill:${me?'var(--sel)':z=='free'?'var(--free)':'var(--taken)'};stroke:${me?'var(--sel)':'var(--line)'};stroke-width:2"/>`}
+  $('#v-nav').innerHTML=`<h2>🧭 ${t('navT')}</h2><div class="card"><b>${t('fl')}${n(s.f+1)}</b><svg viewBox="0 0 340 130" width="100%" style="margin-top:8px">${sp}<text x="${ent}" y="60" font-size="14" text-anchor="${mir?'end':'start'}">🚪</text><path d="M${ent} 66 H${cx} V${s.r?86:44}" fill="none" style="stroke:var(--blue);stroke-width:4;stroke-dasharray:8 6"><animate attributeName="stroke-dashoffset" from="28" to="0" dur="1s" repeatCount="indefinite"/></path><circle cx="${cx}" cy="${s.r?104:26}" r="6" style="fill:var(--blue)"><animate attributeName="r" values="5;9;5" dur="1.2s" repeatCount="indefinite"/></circle></svg></div>${st.map((x,i)=>`<div class="ft"><i>${x[0]}</i><span><b>${n(i+1)}.</b> ${x[1]}</span></div>`).join('')}<button class="primary" style="margin-top:6px" onclick="show('ticket')">🎫 ${t('tkT')}</button>`;
+  show('nav');
+}
+
+const gateUrl=()=>(ls.g('gate')||ARTURL).split('#')[0]+'#gate';
+function setGate(v){v=(v||'').trim();if(/^https:\/\/\S+$/.test(v)){ls.s('gate',v);toast(t('saved2'));if(S.sh)S.sh()}else toast(t('badLink'))}
+function copyGate(){try{navigator.clipboard.writeText(gateUrl()).then(()=>toast(t('copied')),()=>{})}catch(e){}}
+function gatePoster(){
+  showSheet(()=>{const u=gateUrl();
+    $('#sheet').innerHTML=`<h2>🚧 ${t('gateT')}</h2><div style="text-align:center"><div id="gq" style="background:#fff;padding:12px;border-radius:12px;display:inline-block"></div></div><p class="sub" style="text-align:center;word-break:break-all;direction:ltr;font-size:12px">${u} <button class="mini" onclick="copyGate()">${t('copy')}</button></p><p class="warn">${t('gateShare')}</p><label class="lb" for="gl">🔗 ${t('gateLink')}</label><input id="gl" value="${u.split('#')[0]}" onchange="setGate(this.value)"><button class="primary" onclick="simScan()">📷 ${t('simScan')}</button><button class="ghost" onclick="closeSh()">${t('cancel')}</button>`;
+    try{new QRCode($('#gq'),{text:u,width:200,height:200,colorDark:'#17202B',colorLight:'#ffffff'})}catch(e){}});
+}
+function simScan(){closeSh();show('home');gWel()}
+function gWel(){
+  GW=1;S.guest=true;const fr=spots.filter(s=>state(s,Date.now())=='free');
+  $('#tut').style.display='flex';
+  $('#tut').innerHTML=`<button class="lg" onclick="flip()">${lang=='ar'?'EN':'ع'}</button><div class="art c0"><span>🚧🅿️</span></div><h2>${t('gwT')}</h2><p>${t('gwX')}</p><div class="stats" style="width:100%;max-width:320px;margin:10px 0 4px"><div class="st"><i>🚗</i><b>${n(fr.length)}</b><span>${t('sA')}</span></div><div class="st g"><i>⚡</i><b>${n(fr.filter(s=>s.ev).length)}</b><span>${t('sE')}</span></div><div class="st p"><i>♿</i><b>${n(fr.filter(s=>s.acc).length)}</b><span>${t('sC')}</span></div></div><button class="primary" onclick="endGW()">${t('gwB')}</button>`;
+  grid();
+}
+function endGW(){GW=0;$('#tut').style.display='none';show('home');grid()}
+
+function setts(){
+  const sv=ls.g('pay');
+  $('#v-settings').innerHTML=`<h2>⚙️ ${t('stT')}</h2>
+  <div class="card"><b>🌐 ${t('lang')}</b><div class="seg" style="margin:8px 0 0"><button class="${lang=='ar'?'on':''}" onclick="setLang('ar')">العربية</button><button class="${lang=='en'?'on':''}" onclick="setLang('en')">English</button></div></div>
+  <div class="card"><div class="k" style="border:0;padding:0"><b>💳 ${t('pm')}</b><span>${sv?svL(sv):t('none')}</span></div>${sv?`<button class="ghost" onclick="ls.d('pay');toast(t('cleared'));setts()">🗑️ ${t('clear')}</button>`:''}</div>
+  <div class="card"><label class="chk" style="margin:0"><input type="checkbox" ${S.demo?'checked':''} onchange="setDemo(this.checked)"> <b>🎬 ${t('demo')}</b></label><p class="sub" style="margin:6px 0 0;font-size:13px">${t('demoTx')}</p></div>
+  <div class="card"><div class="k" style="border:0;padding:0"><b>🛡️ ${t('bufL')}</b><span>${bufTxt(false)}</span></div></div>
+  <div class="card"><div class="k" style="border:0;padding:0"><b>🚧 ${t('gateT')}</b><button class="mini" onclick="gatePoster()">${t('show')}</button></div><p class="sub" style="margin:6px 0 0;font-size:13px">${t('gateS')}</p></div>
+  <div class="card"><div class="k" style="border:0;padding:0"><b>🔔 ${t('snd')}</b><button class="mini" onclick="beep()">${t('test')}</button></div><p class="sub" style="margin:6px 0 0;font-size:13px">${t('sndTx')}</p></div>
+  <div class="card"><div class="k" style="border:0;padding:0"><b>❓ ${t('help')}</b><button class="mini" onclick="showTut()">${t('show')}</button></div></div>
+  <h2 style="margin-top:16px">✨ ${t('ft')}</h2>${F.map(f=>`<div class="ft"><i>${f[0]}</i><span>${t(f[1])}</span></div>`).join('')}`;
+}
+function tut(){
+  const last=ti==3;
+  $('#tut').innerHTML=`<button class="lg" onclick="flip()">${lang=='ar'?'EN':'ع'}</button><div class="art c${ti}"><span>${TI[ti]}</span></div><h2>${t('t'+ti)}</h2><p>${t('x'+ti)}</p>
+  <div class="dots">${[0,1,2,3].map(j=>`<b class="${j==ti?'on':''}"></b>`).join('')}</div>
+  <button class="primary" onclick="${last?'endTut()':'ti++;tut()'}">${last?t('start'):t('next')}</button><button class="ghost" onclick="endTut()" style="${last?'visibility:hidden':''}">${t('skip')}</button>`;
+}
+function showTut(){GW=0;ti=0;$('#tut').style.display='flex';tut()}
+function endTut(){$('#tut').style.display='none';ls.s('seen',1)}
+applyLang();
+if((location.hash||'')=='#gate')gWel();else if(!ls.g('seen'))showTut();
+setInterval(tick,500);
+</script></body></html>
